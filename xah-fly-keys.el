@@ -2060,11 +2060,11 @@ Version 2015-01-26"
     (define-key xah-fly-key-map (kbd "k") 'next-line)
     (define-key xah-fly-key-map (kbd "f") 'delete-char)
     (define-key xah-fly-key-map (kbd ".") 'xah-forward-right-bracket)
-    (define-key xah-fly-key-map (kbd ",") 'other-window)
+    (define-key xah-fly-key-map (kbd "w") 'other-window)
     (define-key xah-fly-key-map (kbd "b") 'xah-fly-leader-key-map)
     (define-key xah-fly-key-map (kbd "t") 'set-mark-command)
     (define-key xah-fly-key-map (kbd "/") 'comment-dwim)
-    (define-key xah-fly-key-map (kbd "q") 'keyboard-escape-quit)
+    (define-key xah-fly-key-map (kbd "q") 'keyboard-escape-quit) 
 
     (define-key xah-fly-key-map (kbd "A") nil)
     (define-key xah-fly-key-map (kbd "B") nil)
