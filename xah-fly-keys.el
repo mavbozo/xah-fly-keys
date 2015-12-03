@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 2.1.8
+;; Version: 2.3.0
 ;; Created: 10 Sep 2013
 ;; Keywords: convenience, emulations, vim, ergoemacs
 ;; Homepage: http://ergoemacs.org/misc/ergoemacs_vi_mode.html
@@ -20,11 +20,11 @@
 
 ;; It is a modal mode, like vi, but key choices are based on statistics of command call frequency, and key position easy-to-press score.
 
-;; xah-fly-keys does not bind any Control key, nor Meta keys (except 3, but you can turn off).
+;; xah-fly-keys does not bind any Control key, nor Meta keys (except 3, but you can turn off). use emacs as is, because no Control or Meta are used. Just leave xah-fly-keys in insertion mode.
 
-;; To learn xah-fly-keys, is like learning vi for the first time. All is new. You'll need one month to adopt. (but you can use emacs as is, because no Control or Meta are used.)
+;; To learn xah-fly-keys, is like learning vi for the first time. You'll need one month to adopt.
 
-;; xah-fly-keys is currently optimized for Dvorak layout only. If you touch-type QWERTY or other, you will need to rebind keys. See home page for detail: http://ergoemacs.org/misc/ergoemacs_vi_mode.html
+;; xah-fly-keys is currently optimized for Dvorak layout only. If you touch-type QWERTY or other, you will need to rebind keys. I recommend you fork it and modify the keys for your own use. See home page for detail: http://ergoemacs.org/misc/ergoemacs_vi_mode.html
 
 ;; --------------------------------------------------
 ;; MANUAL INSTALL
@@ -39,11 +39,11 @@
 ;; --------------------------------------------------
 ;; USE
 
-;; Important commands, and defeat keys
+;; Important commands and default keys
 
-;; command: xah-fly-keys (key: 【Ctrl+7】, 【menu end】) to toggle the mode on/off.
+;; command: xah-fly-keys (【Ctrl+7】) to toggle the mode on/off.
 
-;; It is necessary and important to toggle xah-fly-keys mode. Because, it gives you access to special modes that use letter keys, such as dired
+;; It is necessary to toggle xah-fly-keys mode. Because, it gives you access to special modes that use letter keys, such as dired
 
 ;; Important command/insert mode switch keys:
 
@@ -94,6 +94,10 @@
 (require 'dired-x) ; in emacs
 
 
+(defvar xah-fly-command-mode-activate-hook nil "Hook for `xah-fly-command-mode-activate'")
+(defvar xah-fly-insert-mode-activate-hook nil "Hook for `xah-fly-insert-mode-activate'")
+
+
 ;; cursor movement
 
 (defun xah-forward-block (&optional φn)
@@ -118,6 +122,25 @@ Version 2015-07-08"
         (progn (goto-char (point-min))
                (setq ξi φn)))
       (setq ξi (1+ ξi)))))
+
+(defun xah-beginning-of-line-or-block-region (&optional φn)
+  "Move cursor to beginning of line, or beginning of current or previous text block.
+ (a text block is separated by blank lines)"
+  (interactive "p")
+  (if (use-region-p)
+      (let* ((deactivate-mark nil)
+             (ξp1 (region-beginning))
+             (ξp2 (region-end))
+             (ξtext (buffer-substring ξp1 ξp2))
+             ξp3
+             )
+        (delete-region ξp1 ξp2)
+        (setq mark-active nil)
+        (xah-beginning-of-line-or-block-raw)
+        (setq ξp3 (point))
+        (insert ξtext)
+        (set-mark ξp3))
+    (xah-beginning-of-line-or-block-raw)))
 
 (defun xah-beginning-of-line-or-block (&optional φn)
   "Move cursor to beginning of line, or beginning of current or previous text block.
@@ -226,21 +249,42 @@ Version 2015-06-15"
       (left-char))))
 
 (defun xah-forward-quote ()
-  "Move cursor to the next occurrence of ' or \".
+  "Move cursor to the next occurrence of ' or \" or `.
+If there are consecutive quotes of the same char, keep moving until none.
+Returns `t' if found, else `nil'.
 URL `http://ergoemacs.org/emacs/emacs_navigating_keys_for_brackets.html'
-Version 2015-03-24"
+Version 2015-10-26"
   (interactive)
-  (search-forward-regexp "'+\\|\\\"+" nil t))
+  (if (search-forward-regexp "'+\\|`+\\|\\\"+" nil t)
+      t
+    (progn
+      (message "No more quotes after.")
+      nil)))
+
+(defun xah-forward-quote-twice ()
+  "Call `xah-forward-quote' twice.
+Returns `t' if found, else `nil'.
+URL `http://ergoemacs.org/emacs/emacs_navigating_keys_for_brackets.html'
+Version 2015-10-26"
+  (interactive)
+  (when (xah-forward-quote)
+    (xah-forward-quote)))
 
 (defun xah-backward-quote ()
-  "Move cursor to the previous occurrence of ' or \".
+  "Move cursor to the previous occurrence of '' or \" or `.
+If there are consecutive quotes of the same char, keep moving until none.
+Returns `t' if found, else `nil'.
 URL `http://ergoemacs.org/emacs/emacs_navigating_keys_for_brackets.html'
-Version 2015-03-24"
+Version 2015-10-26"
   (interactive)
-  (search-backward-regexp "'+\\|\\\"+" nil t)
-  (let ( (thisChar (char-after)))
-    (while (char-equal (char-before) thisChar)
-      (left-char ))))
+  (if (search-backward-regexp "'+\\|`+\\|\\\"+" nil t)
+      (when (char-before) ; isn't nil, at beginning of buffer
+        (while (char-equal (char-before) (char-after))
+          (left-char)
+          t))
+    (progn
+      (message "No more quotes before.")
+      nil)))
 
 (defun xah-forward-dot-comma ()
   "Move cursor to the next occurrence of 「.」 「,」 「;」.
@@ -490,9 +534,9 @@ Version 2015-03-03"
 
 (defun xah-shrink-whitespaces ()
   "Remove whitespaces around cursor to just one or none.
-Remove whitespaces around cursor to just one space, or remove neighboring blank lines to just one or none.
+Call this command again to shrink more. 3 calls will remove all whitespaces.
 URL `http://ergoemacs.org/emacs/emacs_shrink_whitespace.html'
-Version 2015-03-03"
+Version 2015-11-04"
   (interactive)
   (let ((pos0 (point))
         ξline-has-char-p ; current line contains non-white space chars
@@ -573,16 +617,22 @@ Version 2015-06-20"
 
 (defun xah-unfill-paragraph ()
   "Replace newline chars in current paragraph by single spaces.
-This command does the inverse of `fill-paragraph'."
+This command does the inverse of `fill-paragraph'.
+
+URL `http://ergoemacs.org/emacs/emacs_unfill-paragraph.html'
+Version 2015-11-28"
   (interactive)
-  (let ((fill-column 90002000)) ; 90002000 is just random. you can use `most-positive-fixnum'
+  (let ((fill-column most-positive-fixnum))
     (fill-paragraph)))
 
 (defun xah-unfill-region (start end)
   "Replace newline chars in region by single spaces.
-This command does the inverse of `fill-region'."
+This command does the inverse of `fill-region'.
+
+URL `http://ergoemacs.org/emacs/emacs_unfill-paragraph.html'
+Version 2015-11-28"
   (interactive "r")
-  (let ((fill-column 90002000))
+  (let ((fill-column most-positive-fixnum))
     (fill-region start end)))
 
 (defun xah-cycle-hyphen-underscore-space ()
@@ -646,13 +696,14 @@ Version 2015-08-18"
 
 (defun xah-copy-file-path (&optional φdir-path-only-p)
   "Copy the current buffer's file path or dired path to `kill-ring'.
+Result is full path.
 If `universal-argument' is called first, copy only the dir path.
 URL `http://ergoemacs.org/emacs/emacs_copy_file_path.html'
-Version 2015-08-08"
+Version 2015-12-02"
   (interactive "P")
   (let ((ξfpath
          (if (equal major-mode 'dired-mode)
-             default-directory
+             (expand-file-name default-directory)
            (if (null (buffer-file-name))
                (user-error "Current buffer is not associated with a file.")
              (buffer-file-name)))))
@@ -704,18 +755,21 @@ See also: `xah-copy-to-register-1', `insert-register'."
     )
   (insert-register ?1 t))
 
-(defun xah-copy-rectangle-to-clipboard (φbegin φend)
-  "Copy region as column (rectangle) to operating system's clipboard.
-This command will also put the text in register 0.
+(defun xah-copy-rectangle-to-kill-ring (φbegin φend)
+  "Copy region as column (rectangle region) to `kill-ring'
 
-See also: `kill-rectangle', `copy-to-register'."
+See also: `kill-rectangle', `copy-to-register'.
+URL `http://ergoemacs.org/emacs/emacs_copy_rectangle_text_to_clipboard.html'
+version 2015-11-16"
+  ;; extract-rectangle suggested by YoungFrog, 2012-07-25
   (interactive "r")
-  (let ((x-select-enable-clipboard t))
-    (copy-rectangle-to-register ?0 φbegin φend)
-    (kill-new
-     (with-temp-buffer
-       (insert-register ?0)
-       (buffer-string) ))))
+  (require 'rect)
+  (kill-new
+   (with-temp-buffer
+     (mapc (lambda (ξx) (insert ξx "\n"))
+           (extract-rectangle φbegin φend))
+     (delete-char -1)
+     (buffer-string))))
 
 (defun xah-upcase-sentence ()
   "Upcase sentence.
@@ -962,11 +1016,13 @@ This command is conveniently used together with `kill-rectangle' and `string-rec
 (defun xah-insert-alphabets-az (&optional φuse-uppercase-p)
   "Insert letters a to z vertically.
 If `universal-argument' is called first, use CAPITAL letters.
-Note: this command is similar to `rectangle-number-lines', starting at 65 or 97, and with a format of 「%c」."
+
+URL `http://ergoemacs.org/emacs/emacs_insert-alphabets.html'
+Version 2015-11-06"
   (interactive "P")
   (let ((startChar (if φuse-uppercase-p 65 97 )))
-    (dotimes (ii 26)
-      (insert (format "%c\n" (+ startChar ii))))))
+    (dotimes (ξi 26)
+      (insert (format "%c\n" (+ startChar ξi))))))
 
 (defvar xah-unicode-list nil "Associative list of Unicode symbols. First element is a Unicode character, second element is a string used as key shortcut in `ido-completing-read'")
 (setq xah-unicode-list
@@ -1026,38 +1082,43 @@ Version 2015-02-07
   (end-of-line)
   (set-mark (line-beginning-position)))
 
-(defun xah-semnav-up (arg)
+(defun xah-semnav-up (φarg)
 "Called by `xah-extend-selection'.
+
+URL `http://ergoemacs.org/emacs/modernization_mark-word.html'
+Version 2015-11-13.
 Written by Nikolaj Schumacher, 2008-10-20. Released under GPL 2"
   (interactive "p")
   (when (nth 3 (syntax-ppss))
-    (if (> arg 0)
+    (if (> φarg 0)
         (progn
           (skip-syntax-forward "^\"")
           (goto-char (1+ (point)))
-          (setq arg (1- arg) ))
+          (setq φarg (1- φarg) ))
       (skip-syntax-backward "^\"")
       (goto-char (1- (point)))
-      (setq arg (1+ arg) )))
-  (up-list arg))
+      (setq φarg (1+ φarg) )))
+  (up-list φarg))
 
-(defun xah-extend-selection (arg &optional incremental)
+(defun xah-extend-selection (φarg &optional φincremental-p)
   "Select the current word.
 Subsequent calls expands the selection to larger semantic unit.
 
 This command works mostly in lisp syntax.
-Written by Nikolaj Schumacher, 2008-10-20. Released under GPL 2"
+URL `http://ergoemacs.org/emacs/modernization_mark-word.html'
+Version 2015-11-13.
+Written by Nikolaj Schumacher, 2008-10-20. Released under GPL 2."
   (interactive
    (list (prefix-numeric-value current-prefix-arg)
          (or (use-region-p)
              (eq last-command this-command))))
-  (if incremental
+  (if φincremental-p
       (progn
-        (xah-semnav-up (- arg))
+        (xah-semnav-up (- φarg))
         (forward-sexp)
         (mark-sexp -1))
-    (if (> arg 1)
-        (xah-extend-selection (1- arg) t)
+    (if (> φarg 1)
+        (xah-extend-selection (1- φarg) t)
       (if (looking-at "\\=\\(\\s_\\|\\sw\\)*\\_>")
           (goto-char (match-end 0))
         (unless (memq (char-before) '(?\) ?\"))
@@ -1315,7 +1376,7 @@ File suffix is used to determine what program to run.
 If the file is modified or not saved, save it automatically before run.
 
 URL `http://ergoemacs.org/emacs/elisp_run_current_file.html'
-version 2015-10-07"
+version 2015-10-08"
   (interactive)
   (let (
          (ξsuffix-map
@@ -1329,6 +1390,7 @@ version 2015-10-07"
             ("js" . "node") ; node.js
             ("sh" . "bash")
             ("clj" . "java -cp /home/xah/apps/clojure-1.6.0/clojure-1.6.0.jar clojure.main")
+            ("rkt" . "racket")
             ("ml" . "ocaml")
             ("vbs" . "cscript")
             ("tex" . "pdflatex")
@@ -1389,14 +1451,19 @@ Version 2015-04-09"
 (defun xah-open-in-desktop ()
   "Show current file in desktop (OS's file manager).
 URL `http://ergoemacs.org/emacs/emacs_dired_open_file_in_ext_apps.html'
-Version 2015-06-12"
+Version 2015-11-30"
   (interactive)
   (cond
    ((string-equal system-type "windows-nt")
     (w32-shell-execute "explore" (replace-regexp-in-string "/" "\\" default-directory t t)))
    ((string-equal system-type "darwin") (shell-command "open ."))
    ((string-equal system-type "gnu/linux")
-    (let ((process-connection-type nil)) (start-process "" nil "xdg-open" "."))
+    (let (
+          (process-connection-type nil)
+          (openFileProgram (if (file-exists-p "/usr/bin/gvfs-open")
+                               "/usr/bin/gvfs-open"
+                             "/usr/bin/xdg-open")))
+      (start-process "" nil openFileProgram "."))
     ;; (shell-command "xdg-open .") ;; 2013-02-10 this sometimes froze emacs till the folder is closed. ⁖ with nautilus
     )))
 
@@ -1426,7 +1493,16 @@ Version 2015-01-26"
          (lambda (ξfpath) (shell-command (format "open \"%s\"" ξfpath)))  ξfile-list))
        ((string-equal system-type "gnu/linux")
         (mapc
-         (lambda (ξfpath) (let ((process-connection-type nil)) (start-process "" nil "xdg-open" ξfpath))) ξfile-list))))))
+         (lambda (ξfpath) (let ((process-connection-type nil))
+                            (start-process "" nil "xdg-open" ξfpath))) ξfile-list))))))
+
+(defun xah-next-window-or-frame ()
+  "Switch to next window or frame.
+If current frame has only one window, switch to next frame."
+  (interactive)
+  (if (one-window-p)
+      (other-frame 1)
+    (other-window 1)))
 
 
 ;; keymaps
@@ -1717,7 +1793,7 @@ Version 2015-01-26"
   (define-key xah-leader-t-keymap (kbd "t") 'repeat)
   (define-key xah-leader-t-keymap (kbd "u") nil)
   (define-key xah-leader-t-keymap (kbd "v") nil)
-  (define-key xah-leader-t-keymap (kbd "w") 'other-window)
+  (define-key xah-leader-t-keymap (kbd "w") 'xah-next-window-or-frame)
   (define-key xah-leader-t-keymap (kbd "x") nil)
   (define-key xah-leader-t-keymap (kbd "y") nil)
   (define-key xah-leader-t-keymap (kbd "z") 'number-to-register))
@@ -1818,12 +1894,12 @@ Version 2015-01-26"
         (define-key xah-fly-leader-key-map (kbd "8") nil)
         (define-key xah-fly-leader-key-map (kbd "7") nil)
         (define-key xah-fly-leader-key-map (kbd "2") 'dired-jump)
-        (define-key xah-fly-leader-key-map (kbd "1") 'ffap))
+        (define-key xah-fly-leader-key-map (kbd "1") 'find-file-at-point))
     (progn
       (define-key xah-fly-leader-key-map (kbd "1") nil)
       (define-key xah-fly-leader-key-map (kbd "2") nil)
       (define-key xah-fly-leader-key-map (kbd "7") 'dired-jump)
-      (define-key xah-fly-leader-key-map (kbd "8") 'ffap)))
+      (define-key xah-fly-leader-key-map (kbd "8") 'find-file-at-point)))
 
   (define-key xah-fly-leader-key-map (kbd "3") nil)
   (define-key xah-fly-leader-key-map (kbd "4") 'split-window-right)
@@ -2009,11 +2085,12 @@ Version 2015-01-26"
     (define-key xah-fly-key-map (kbd "-") nil)
     (define-key xah-fly-key-map (kbd ".") 'backward-kill-word)
     (define-key xah-fly-key-map (kbd ";") nil)
+    (define-key xah-fly-key-map (kbd ":") nil)
     (define-key xah-fly-key-map (kbd "/") 'xah-backward-equal-sign)
     (define-key xah-fly-key-map (kbd "\\") nil)
     (define-key xah-fly-key-map (kbd "=") 'xah-forward-equal-sign)
     (define-key xah-fly-key-map (kbd "[") 'xah-backward-quote )
-    (define-key xah-fly-key-map (kbd "]") 'xah-forward-quote)
+    (define-key xah-fly-key-map (kbd "]") 'xah-forward-quote-twice)
     (define-key xah-fly-key-map (kbd "`") nil)
     (define-key xah-fly-key-map (kbd "SPC") 'xah-fly-insert-mode-activate)
 
@@ -2031,7 +2108,7 @@ Version 2015-01-26"
 
     (define-key xah-fly-key-map (kbd "3") 'delete-other-windows)
     (define-key xah-fly-key-map (kbd "4") 'split-window-below)
-    (define-key xah-fly-key-map (kbd "5") 'redo)
+    (define-key xah-fly-key-map (kbd "5") nil)
 
     (define-key xah-fly-key-map (kbd "6") 'xah-select-current-block)
     (define-key xah-fly-key-map (kbd "9") 'xah-select-text-in-quote)
@@ -2060,7 +2137,7 @@ Version 2015-01-26"
     (define-key xah-fly-key-map (kbd "k") 'next-line)
     (define-key xah-fly-key-map (kbd "f") 'delete-char)
     (define-key xah-fly-key-map (kbd ".") 'xah-forward-right-bracket)
-    (define-key xah-fly-key-map (kbd "w") 'other-window)
+    (define-key xah-fly-key-map (kbd "w") 'xah-next-window-or-frame)
     (define-key xah-fly-key-map (kbd "b") 'xah-fly-leader-key-map)
     (define-key xah-fly-key-map (kbd "t") 'set-mark-command)
     (define-key xah-fly-key-map (kbd "/") 'comment-dwim)
@@ -2070,7 +2147,7 @@ Version 2015-01-26"
     (define-key xah-fly-key-map (kbd "B") nil)
     (define-key xah-fly-key-map (kbd "C") nil)
     (define-key xah-fly-key-map (kbd "D") nil)
-    (define-key xah-fly-key-map (kbd "E") nil)
+    (define-key xah-fly-key-map (kbd "E") 'xah-toggle-letter-case)
     (define-key xah-fly-key-map (kbd "F") nil)
     (define-key xah-fly-key-map (kbd "G") nil)
     (define-key xah-fly-key-map (kbd "H") nil)
@@ -2080,13 +2157,13 @@ Version 2015-01-26"
     (define-key xah-fly-key-map (kbd "L") nil)
     (define-key xah-fly-key-map (kbd "M") nil)
     (define-key xah-fly-key-map (kbd "N") nil)
-    (define-key xah-fly-key-map (kbd "O") nil)
-    (define-key xah-fly-key-map (kbd "P") nil)
+    (define-key xah-fly-key-map (kbd "O") 'xah-insert-space-before)
+    (define-key xah-fly-key-map (kbd "P") 'hippie-expand)
     (define-key xah-fly-key-map (kbd "Q") nil)
     (define-key xah-fly-key-map (kbd "R") nil)
     (define-key xah-fly-key-map (kbd "S") nil)
     (define-key xah-fly-key-map (kbd "T") nil)
-    (define-key xah-fly-key-map (kbd "U") nil)
+    (define-key xah-fly-key-map (kbd "U") 'xah-cycle-hyphen-underscore-space)
     (define-key xah-fly-key-map (kbd "V") nil)
     (define-key xah-fly-key-map (kbd "W") nil)
     (define-key xah-fly-key-map (kbd "X") nil)
@@ -2095,7 +2172,7 @@ Version 2015-01-26"
     ))
 
 (defun xah-fly-insert-mode-init ()
-  "set insertion mode keys"
+  "Set insertion mode keys"
   (interactive)
   (progn
     (define-key xah-fly-key-map (kbd "'") 'self-insert-command)
@@ -2184,19 +2261,30 @@ Version 2015-01-26"
       (xah-fly-command-mode-activate)
     (xah-fly-insert-mode-activate)))
 
+(add-hook 'xah-fly-command-mode-activate-hook 'xah-fly-save-buffer-if-file)
+
+(defun xah-fly-save-buffer-if-file ()
+  "Save current buffer if it is a file."
+  (interactive)
+  (let (VAR)
+    (when (buffer-file-name)
+      (save-buffer))))
+
 (defun xah-fly-command-mode-activate ()
   "Activate command mode."
   (interactive)
   (modify-all-frames-parameters (list (cons 'cursor-type 'box)))
   (setq xah-fly-insert-state-q nil )
-  (xah-fly-command-mode-init))
+  (xah-fly-command-mode-init)
+  (run-hooks 'xah-fly-command-mode-activate-hook))
 
 (defun xah-fly-insert-mode-activate ()
   "Activate insertion mode."
   (interactive)
   (modify-all-frames-parameters (list (cons 'cursor-type 'bar)))
   (setq xah-fly-insert-state-q t )
-  (xah-fly-insert-mode-init))
+  (xah-fly-insert-mode-init)
+  (run-hooks 'xah-fly-insert-mode-activate-hook))
 
 (defun xah-fly-insert-mode-activate-insert-return ()
   "Activate insertion mode, and insert a newline."
@@ -2213,6 +2301,9 @@ Version 2015-01-26"
 ;; when in shell mode, switch to insertion mode.
 (add-hook 'shell-mode-hook 'xah-fly-insert-mode-activate)
 
+;; ;; when in shell mode, switch to insertion mode.
+;; (add-hook 'dired-mode-hook 'xah-fly-keys-off)
+
 
 
 ;; experimental. auto switch back to command mode after some sec of idle time
@@ -2224,10 +2315,15 @@ Version 2015-01-26"
   1 "ξflykeys" xah-fly-key-map
   (xah-fly-command-mode-activate))
 
+(defun xah-fly-keys-off ()
+  "Turn off xah-fly-keys minor mode."
+  (interactive)
+  (xah-fly-keys 0))
+
 (provide 'xah-fly-keys)
 
 ;; Local Variables:
 ;; coding: utf-8
 ;; End:
 
-;;; xah-fly-keys ends here
+;;; xah-fly-keys.el ends here
