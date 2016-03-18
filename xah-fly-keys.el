@@ -1654,7 +1654,7 @@ If `universal-argument' is called first, do switch frame."
   (define-prefix-command 'xah-leader-i-keymap) ; commands in goto-map
   (define-key xah-leader-i-keymap (kbd "TAB") 'move-to-column)
   (define-key xah-leader-i-keymap (kbd "c") 'goto-char)
-  (define-key xah-leader-i-keymap (kbd "t") 'goto-line)
+  (define-key xah-leader-i-keymap (kbd "g") 'goto-line)
   (define-key xah-leader-i-keymap (kbd "n") 'next-error)
   (define-key xah-leader-i-keymap (kbd "d") 'previous-error))
 
@@ -2271,7 +2271,35 @@ If `universal-argument' is called first, do switch frame."
     (define-key xah-fly-key-map (kbd "y") nil)
     (define-key xah-fly-key-map (kbd "z") nil)
 
+
+    (define-key xah-fly-key-map (kbd "A") nil)
+    (define-key xah-fly-key-map (kbd "B") nil)
+    (define-key xah-fly-key-map (kbd "C") nil)
+    (define-key xah-fly-key-map (kbd "D") nil)
+    (define-key xah-fly-key-map (kbd "E") nil)
+    (define-key xah-fly-key-map (kbd "F") nil)
+    (define-key xah-fly-key-map (kbd "G") nil)
+    (define-key xah-fly-key-map (kbd "H") nil)
+    (define-key xah-fly-key-map (kbd "I") nil)
+    (define-key xah-fly-key-map (kbd "J") nil)
+    (define-key xah-fly-key-map (kbd "K") nil)
+    (define-key xah-fly-key-map (kbd "L") nil)
+    (define-key xah-fly-key-map (kbd "M") nil)
+    (define-key xah-fly-key-map (kbd "N") nil)
+    (define-key xah-fly-key-map (kbd "O") nil)
+    (define-key xah-fly-key-map (kbd "P") nil)
+    (define-key xah-fly-key-map (kbd "Q") nil)
+    (define-key xah-fly-key-map (kbd "R") nil)
+    (define-key xah-fly-key-map (kbd "S") nil)
+    (define-key xah-fly-key-map (kbd "T") nil)
+    (define-key xah-fly-key-map (kbd "U") nil)
+    (define-key xah-fly-key-map (kbd "V") nil)
+    (define-key xah-fly-key-map (kbd "W") nil)
+    (define-key xah-fly-key-map (kbd "X") nil)
+    (define-key xah-fly-key-map (kbd "Y") nil)
+    (define-key xah-fly-key-map (kbd "Z") nil)
 ))
+
 
 (defun xah-fly-mode-toggle ()
   "Switch between {insertion, command} modes."
