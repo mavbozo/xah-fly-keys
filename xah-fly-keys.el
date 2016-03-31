@@ -1854,8 +1854,8 @@ If `universal-argument' is called first, do switch frame."
   (define-key xah-leader-t-keymap (kbd "z") 'number-to-register))
 
 (progn
-  (define-prefix-command 'xah-danger-keymap)
-
+  (
+   define-prefix-command 'xah-danger-keymap)
   (define-key xah-danger-keymap (kbd ".") 'eval-buffer)
   (define-key xah-danger-keymap (kbd "e") 'eval-defun)
   (define-key xah-danger-keymap (kbd "m") 'eval-last-sexp)
@@ -1864,6 +1864,18 @@ If `universal-argument' is called first, do switch frame."
   (define-key xah-danger-keymap (kbd "q") 'save-buffers-kill-terminal)
   (define-key xah-danger-keymap (kbd "w") 'delete-frame)
   (define-key xah-danger-keymap (kbd "j") 'xah-run-current-file))
+
+
+;; cider keymap
+(progn
+  (define-prefix-command 'mavbozo-cider-keymap)
+  (define-key mavbozo-cider-keymap (kbd "c") 'cider-connect)
+  (define-key mavbozo-cider-keymap (kbd "p") 'cider-eval-defun-at-point)
+  (define-key mavbozo-cider-keymap (kbd "r") 'cider-refresh)
+  (define-key mavbozo-cider-keymap (kbd "u") 'cider-eval-region)
+  (define-key mavbozo-cider-keymap (kbd "w") 'cider-switch-to-repl-buffer)
+  (define-key mavbozo-cider-keymap (kbd ".") 'cider-load-buffer)
+  )
 
 (progn
   (define-prefix-command 'xah-insertion-keymap)
@@ -1955,7 +1967,7 @@ If `universal-argument' is called first, do switch frame."
   (define-key xah-fly-leader-key-map (kbd "l") 'recenter-top-bottom)
   (define-key xah-fly-leader-key-map (kbd "m") nil)
   (define-key xah-fly-leader-key-map (kbd "n") xah-harmless-keymap)
-  (define-key xah-fly-leader-key-map (kbd "o") nil)
+  (define-key xah-fly-leader-key-map (kbd "o") mavbozo-cider-keymap)
   (define-key xah-fly-leader-key-map (kbd "p") 'query-replace)
   (define-key xah-fly-leader-key-map (kbd "q") 'xah-copy-all-or-region)
   (define-key xah-fly-leader-key-map (kbd "r") xah-edit-cmds-keymap)
@@ -2390,6 +2402,7 @@ If `universal-argument' is called first, do switch frame."
 ;; (setq xah-fly-timer-id (run-with-idle-timer 20 t 'xah-fly-command-mode-activate))
 ;; (cancel-timer xah-fly-timer-id)
 
+
 (define-minor-mode xah-fly-keys
   "A modal keybinding set, like vim, but based on ergonomic principles, like Dvorak layout."
   1 "ξflykeys" xah-fly-key-map
@@ -2407,3 +2420,4 @@ If `universal-argument' is called first, do switch frame."
 ;; End:
 
 ;;; xah-fly-keys.el ends here
+
