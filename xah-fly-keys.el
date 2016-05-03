@@ -1907,7 +1907,11 @@ If `universal-argument' is called first, do switch frame."
    ("r" . cider-refresh)
    ("u" . cider-eval-region)
    ("w" . cider-switch-to-repl-buffer)
-   ("." . cider-load-buffer)))
+   ("." . cider-load-buffer)
+   ("e" . cider-eval-last-sexp)
+   ("E" . cider-eval-last-sexp-to-repl)
+   ("z" . cider-switch-to-repl-buffer)
+   ("Z" . cider-load-buffer-and-switch-to-repl-buffer)))
 
 
 (xah-fly-map-keys
