@@ -1903,6 +1903,8 @@ If `universal-argument' is called first, do switch frame."
  (define-prefix-command 'mavbozo-cider-keymap)
  '(
    ("c" . cider-connect)
+   ("n" . cider-eval-ns-form)
+   ("N" . cider-repl-set-ns)
    ("p" . cider-eval-defun-at-point)
    ("r" . cider-refresh)
    ("u" . cider-eval-region)
@@ -2273,11 +2275,11 @@ If `universal-argument' is called first, do switch frame."
     (define-key xah-fly-key-map (kbd "z") 'comment-dwim)
 
     ;; 
-    ;;(define-key xah-fly-key-map (kbd "I") 'pop-global-mark)
+    (define-key xah-fly-key-map (kbd "I") 'pop-global-mark)
     (define-key xah-fly-key-map (kbd "D") nil)
-    ;;(define-key xah-fly-key-map (kbd "K") 'xah-jump-to-last-local-mark)
-    ;;(define-key xah-fly-key-map (kbd "F") 'kill-line)
-    ;;(define-key xah-fly-key-map (kbd "Y") 'redo)
+    (define-key xah-fly-key-map (kbd "K") 'xah-jump-to-last-local-mark)
+    (define-key xah-fly-key-map (kbd "F") 'kill-line)
+    (define-key xah-fly-key-map (kbd "Y") 'redo)
 
     ;;
     ))
@@ -2338,10 +2340,34 @@ If `universal-argument' is called first, do switch frame."
     (define-key xah-fly-key-map (kbd "y") nil)
     (define-key xah-fly-key-map (kbd "z") nil)
 
+    (define-key xah-fly-key-map (kbd "A") nil)
+    (define-key xah-fly-key-map (kbd "B") nil)
     (define-key xah-fly-key-map (kbd "C") nil)
+    (define-key xah-fly-key-map (kbd "D") nil)
     (define-key xah-fly-key-map (kbd "E") nil)
+    (define-key xah-fly-key-map (kbd "F") nil)
+    (define-key xah-fly-key-map (kbd "G") nil)
+    (define-key xah-fly-key-map (kbd "H") nil)
+    (define-key xah-fly-key-map (kbd "I") nil)
+    (define-key xah-fly-key-map (kbd "J") nil)
+    (define-key xah-fly-key-map (kbd "K") nil)
+    (define-key xah-fly-key-map (kbd "L") nil)
+    (define-key xah-fly-key-map (kbd "M") nil)
+    (define-key xah-fly-key-map (kbd "N") nil)
+    (define-key xah-fly-key-map (kbd "O") nil)
+    (define-key xah-fly-key-map (kbd "P") nil)
+    (define-key xah-fly-key-map (kbd "Q") nil)
+    (define-key xah-fly-key-map (kbd "R") nil)
+    (define-key xah-fly-key-map (kbd "S") nil)
     (define-key xah-fly-key-map (kbd "T") nil)
     (define-key xah-fly-key-map (kbd "U") nil)
+    (define-key xah-fly-key-map (kbd "V") nil)
+    (define-key xah-fly-key-map (kbd "W") nil)
+    (define-key xah-fly-key-map (kbd "X") nil)
+    (define-key xah-fly-key-map (kbd "Y") nil)
+    (define-key xah-fly-key-map (kbd "Z") nil)
+
+    
 
     ;;
 ))
