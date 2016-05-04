@@ -2273,11 +2273,11 @@ If `universal-argument' is called first, do switch frame."
     (define-key xah-fly-key-map (kbd "z") 'comment-dwim)
 
     ;; 
-    (define-key xah-fly-key-map (kbd "I") 'pop-global-mark)
+    ;;(define-key xah-fly-key-map (kbd "I") 'pop-global-mark)
     (define-key xah-fly-key-map (kbd "D") nil)
-    (define-key xah-fly-key-map (kbd "K") 'xah-jump-to-last-local-mark)
-    (define-key xah-fly-key-map (kbd "F") 'kill-line)
-    (define-key xah-fly-key-map (kbd "Y") 'redo)
+    ;;(define-key xah-fly-key-map (kbd "K") 'xah-jump-to-last-local-mark)
+    ;;(define-key xah-fly-key-map (kbd "F") 'kill-line)
+    ;;(define-key xah-fly-key-map (kbd "Y") 'redo)
 
     ;;
     ))
