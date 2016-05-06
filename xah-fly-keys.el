@@ -1902,18 +1902,21 @@ If `universal-argument' is called first, do switch frame."
 (xah-fly-map-keys
  (define-prefix-command 'mavbozo-cider-keymap)
  '(
-   ("c" . cider-connect)
+   ("c" . cider-eval-defun-at-point)
+   ("C" . cider-connect)
+   ("e" . cider-eval-last-sexp)
+   ("E" . cider-eval-last-sexp-to-repl)
    ("n" . cider-eval-ns-form)
    ("N" . cider-repl-set-ns)
    ("p" . cider-eval-defun-at-point)
-   ("r" . cider-refresh)
    ("u" . cider-eval-region)
-   ("w" . cider-switch-to-repl-buffer)
-   ("." . cider-load-buffer)
-   ("e" . cider-eval-last-sexp)
-   ("E" . cider-eval-last-sexp-to-repl)
+   ("x" . cider-refresh)
+   ("w" . cider-eval-last-sexp-and-replace)
    ("z" . cider-switch-to-repl-buffer)
-   ("Z" . cider-load-buffer-and-switch-to-repl-buffer)))
+   ("Z" . cider-load-buffer-and-switch-to-repl-buffer)
+   ("." . cider-load-buffer)
+   (";" . cider-eval-defun-to-comment)
+   (":" . cider-read-and-eval)))
 
 
 (xah-fly-map-keys
