@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 4.3.3
+;; Version: 4.6.6
 ;; Created: 10 Sep 2013
 ;; Keywords: convenience, emulations, vim, ergoemacs
 ;; Homepage: http://ergoemacs.org/misc/ergoemacs_vi_mode.html
@@ -66,23 +66,20 @@
 
 ;; the following stardard keys with Control are supported, when the variable xah-fly-use-control-key is t
 
-;; (when xah-fly-use-control-key
-;;     (progn
-;;       (define-key xah-fly-key-map (kbd "<C-tab>") 'xah-next-user-buffer)
-;;       (define-key xah-fly-key-map (kbd "<C-S-iso-lefttab>") 'xah-previous-user-buffer)
-;;       (define-key xah-fly-key-map (kbd "C-v") 'yank)
-;;       (define-key xah-fly-key-map (kbd "C-t") 'toggle-input-method)
-;;       (define-key xah-fly-key-map (kbd "C-w") 'xah-close-current-buffer)
-;;       (define-key xah-fly-key-map (kbd "C-z") 'undo)
-;;       (define-key xah-fly-key-map (kbd "C-n") 'xah-new-empty-buffer)
-;;       (define-key xah-fly-key-map (kbd "C-o") 'find-file)
-;;       (define-key xah-fly-key-map (kbd "C-s") 'save-buffer)
-;;       (define-key xah-fly-key-map (kbd "C-S-s") 'write-file)
-;;       (define-key xah-fly-key-map (kbd "C-S-t") 'xah-open-last-closed)
-;;       (define-key xah-fly-key-map (kbd "C-,") 'flyspell-goto-next-error)
-;;       (define-key xah-fly-key-map (kbd "C-+") 'text-scale-increase)
-;;       (define-key xah-fly-key-map (kbd "C--") 'text-scale-decrease)
-;;       (define-key xah-fly-key-map (kbd "C-0") (lambda () (interactive) (text-scale-set 0)))))
+ ;; (kbd "<C-tab>") 'xah-next-user-buffer
+ ;; (kbd "<C-S-iso-lefttab>") 'xah-previous-user-buffer
+ ;; (kbd "C-v") 'yank
+ ;; (kbd "C-t") 'toggle-input-method
+ ;; (kbd "C-w") 'xah-close-current-buffer
+ ;; (kbd "C-z") 'undo
+ ;; (kbd "C-n") 'xah-new-empty-buffer
+ ;; (kbd "C-o") 'find-file
+ ;; (kbd "C-s") 'save-buffer
+ ;; (kbd "C-S-s") 'write-file
+ ;; (kbd "C-S-t") 'xah-open-last-closed
+ ;; (kbd "C-+") 'text-scale-increase
+ ;; (kbd "C--") 'text-scale-decrease
+ ;; (kbd "C-0") (lambda () (interactive) (text-scale-set 0))))
 
 ;; That't it.
 
@@ -1044,20 +1041,21 @@ Version 2015-11-06"
 (defvar xah-unicode-list nil "Associative list of Unicode symbols. First element is a Unicode character, second element is a string used as key shortcut in `ido-completing-read'")
 (setq xah-unicode-list
       '(
+        ("_" . "underscore" )
+        ("•" . ".bullet" )
+        ("→" . "an")
         ("◇" . "3" )
         ("◆" . "4" )
         ("¤" . "2" )
-        ("…" . "." )
-        (" " . "s" )
+        ("…" . "...ellipsis" )
+        (" " . "nbsp" )
         ("、" . "," )
-        ("•" . "8" )
         ("⭑" . "9" )
         ("🎶" . "5" )
-        ("—" . "-" )
+        ("—" . "-emdash" )
         ("＆" . "7" )
         ("↓" . "at")
         ("←" . "ah")
-        ("→" . "an")
         ("↑" . "ac")
         ("👍" . "tu")
         ) )
@@ -1385,14 +1383,16 @@ version 2016-01-28"
 
 (defun xah-clean-whitespace-and-save (φbegin φend)
   "Delete trailing whitespace, and replace repeated blank lines into just 2.
+Only space and tab is considered whitespace here.
 Works on whole buffer or text selection, respects `narrow-to-region'.
+Saves the file if it is a file.
 
 URL `http://ergoemacs.org/emacs/elisp_compact_empty_lines.html'
 Version 2016-03-02"
   (interactive
    (if (region-active-p)
        (list (region-beginning) (region-end))
-     (list 1 (point-max))))
+     (list (point-min) (point-max))))
   (save-excursion
     (save-restriction
       (narrow-to-region φbegin φend)
@@ -1404,11 +1404,10 @@ Version 2016-03-02"
         (goto-char (point-min))
         (while (search-forward-regexp "\n\n\n+" nil "noerror")
           (replace-match "\n\n")))
-
-      (goto-char (point-max))
-      ;; (delete-trailing-whitespace)
-
-      ))
+      (progn
+        (goto-char (point-max))
+        (while (equal (char-before) 32)
+          (delete-char -1)))))
   (when (buffer-file-name)
     (save-buffer)))
 
@@ -1797,11 +1796,11 @@ If `universal-argument' is called first, do switch frame."
  ;; they turn on minor/major mode, change display, prompt, start shell, etc.
  (define-prefix-command 'xah-harmless-keymap)
  '(
+   ("SPC" . whitespace-mode)
    ("'" . frame-configuration-to-register)
    (";" . window-configuration-to-register)
    ("1" . set-input-method)
    ("2" . global-hl-line-mode)
-   ("3" . whitespace-mode)
    ("4" . linum-mode)
    ("5" . visual-line-mode)
    ("6" . calendar)
@@ -1864,15 +1863,14 @@ If `universal-argument' is called first, do switch frame."
 (xah-fly-map-keys
  (define-prefix-command 'xah-leader-t-keymap)
  '(
+   ("SPC" . xah-clean-whitespace-and-save)
    ("3" . point-to-register)
    ("4" . jump-to-register)
    ("." . sort-lines)
    ("," . sort-numeric-fields)
    ("'" . reverse-region)
    ("d" . mark-defun)
-   ("e" . toggle-input-method)
    ("h" . xah-close-current-buffer)
-   ("i" . xah-clean-whitespace-and-save)
    ("j" . copy-to-register)
    ("k" . insert-register)
    ("l" . increment-register)
@@ -1881,7 +1879,6 @@ If `universal-argument' is called first, do switch frame."
    ("p" . query-replace-regexp)
    ("r" . copy-rectangle-to-register)
    ("t" . repeat)
-   ("u" . xah-insert-date)
    ("w" . xah-next-window-or-frame)
    ("z" . number-to-register)))
 
@@ -1923,10 +1920,11 @@ If `universal-argument' is called first, do switch frame."
  (define-prefix-command 'xah-insertion-keymap)
  '(
    ("RET" . insert-char)
+   ("SPC" . xah-insert-unicode)
+;; xah-insert-date
    ("b" . xah-insert-black-lenticular-bracket【】)
    ("c" . xah-insert-ascii-single-quote)
    ("d" . xah-insert-double-curly-quote“”)
-   ("e" . xah-insert-unicode)
    ("f" . xah-insert-emacs-quote)
    ("g" . xah-insert-ascii-double-quote)
    ("h" . xah-insert-brace) ; {}
@@ -1947,14 +1945,9 @@ If `universal-argument' is called first, do switch frame."
   (define-key xah-fly-leader-key-map (kbd "SPC") 'xah-fly-insert-mode-activate)
   (define-key xah-fly-leader-key-map (kbd "TAB") xah-leader-tab-keymap)
 
-  (define-key xah-fly-leader-key-map (kbd "<mouse-1>") 'xah-set-mouse-wheel-mode) ; left button
-  (define-key xah-fly-leader-key-map (kbd "<mouse-3>") 'xah-set-mouse-scroll-by-50-line) ; right button
-  (define-key xah-fly-leader-key-map (kbd "<mouse-4>") 'xah-set-mouse-wheel-normal) ; wheel up
-  (define-key xah-fly-leader-key-map (kbd "<mouse-5>") 'xah-set-mouse-scroll-by-block) ; wheel down
-
   (define-key xah-fly-leader-key-map (kbd ".") xah-highlight-keymap)
 
-  (define-key xah-fly-leader-key-map (kbd "'") 'quoted-insert)
+  (define-key xah-fly-leader-key-map (kbd "'") nil)
   (define-key xah-fly-leader-key-map (kbd ",") nil)
   (define-key xah-fly-leader-key-map (kbd "-") nil)
   (define-key xah-fly-leader-key-map (kbd "/") nil)
@@ -2149,6 +2142,7 @@ If `universal-argument' is called first, do switch frame."
       (define-key xah-fly-key-map (kbd "<C-prior>") 'xah-previous-user-buffer)
       (define-key xah-fly-key-map (kbd "<C-tab>") 'xah-next-user-buffer)
       (define-key xah-fly-key-map (kbd "<C-S-iso-lefttab>") 'xah-previous-user-buffer)
+
       (define-key xah-fly-key-map (kbd "C-v") 'yank)
       (define-key xah-fly-key-map (kbd "C-t") 'toggle-input-method)
       (define-key xah-fly-key-map (kbd "C-w") 'xah-close-current-buffer)
@@ -2158,20 +2152,26 @@ If `universal-argument' is called first, do switch frame."
       (define-key xah-fly-key-map (kbd "C-s") 'save-buffer)
       (define-key xah-fly-key-map (kbd "C-S-s") 'write-file)
       (define-key xah-fly-key-map (kbd "C-S-t") 'xah-open-last-closed)
-
-      (define-key xah-fly-key-map (kbd "C-,") 'flyspell-goto-next-error)
+      (define-key xah-fly-key-map (kbd "C-S-n") 'make-frame-command)
+      (define-key xah-fly-key-map (kbd "C-8") 'xah-fly-command-mode-activate)
 
       (define-key xah-fly-key-map (kbd "C-+") 'text-scale-increase)
       (define-key xah-fly-key-map (kbd "C--") 'text-scale-decrease)
       (define-key xah-fly-key-map (kbd "C-0") (lambda () (interactive) (text-scale-set 0)))))
 
-  (define-key xah-fly-key-map (kbd "M-SPC") 'xah-cycle-hyphen-underscore-space)
+  (define-key xah-fly-key-map (kbd "M-1") 'xah-jump-to-last-local-mark)
+  (define-key xah-fly-key-map (kbd "M-2") 'pop-global-mark)
+
+  (define-key xah-fly-key-map (kbd "M-RET") 'xah-cycle-hyphen-underscore-space)
   (define-key xah-fly-key-map (kbd "M-c") 'xah-toggle-letter-case )
   (define-key xah-fly-key-map (kbd "M-g") 'hippie-expand )
   (define-key xah-fly-key-map (kbd "M-h") 'xah-insert-brace )
   (define-key xah-fly-key-map (kbd "M-m") xah-insertion-keymap)
   (define-key xah-fly-key-map (kbd "M-n") 'xah-insert-square-bracket)
   (define-key xah-fly-key-map (kbd "M-t") 'xah-insert-paren)
+  (define-key xah-fly-key-map (kbd "M-d") 'xah-insert-date)
+  (define-key xah-fly-key-map (kbd "M-k") 'yank-pop)
+  (define-key xah-fly-key-map (kbd "M-l") 'left-char)
 
   (define-key xah-fly-key-map (kbd "<home>") 'xah-fly-command-mode-activate)
   (define-key xah-fly-key-map (kbd "<f8>") 'xah-fly-command-mode-activate) ; as backup
@@ -2179,16 +2179,10 @@ If `universal-argument' is called first, do switch frame."
   (define-key xah-fly-key-map (kbd "<menu>") xah-fly-leader-key-map)
   (define-key xah-fly-key-map (kbd "<f9>") xah-fly-leader-key-map) ; as backup
 
-  (define-key xah-fly-key-map (kbd "C-8") 'xah-fly-command-mode-activate)
-
   (define-key xah-fly-key-map (kbd "<f11>") 'xah-previous-user-buffer)
   (define-key xah-fly-key-map (kbd "<f12>") 'xah-next-user-buffer)
   (define-key xah-fly-key-map (kbd "<C-f11>") 'xah-previous-emacs-buffer)
   (define-key xah-fly-key-map (kbd "<C-f12>") 'xah-next-emacs-buffer)
-
-  ;; these are good for compatibilty. e.g. you set a mouse or other device to use this key for generic OS wide operation, and it should work in emacs too
-  (define-key xah-fly-key-map (kbd "<C-prior>") 'xah-previous-user-buffer)
-  (define-key xah-fly-key-map (kbd "<C-next>") 'xah-next-user-buffer)
 
   (progn
     ;; set arrow keys in isearch. left/right is backward/forward, up/down is history. press Return to exit
@@ -2408,10 +2402,23 @@ If `universal-argument' is called first, do switch frame."
   (run-hooks 'xah-fly-insert-mode-activate-hook))
 
 (defun xah-fly-insert-mode-activate-newline ()
-  "Activate insertion mode, inserting 2 newlines below."
+  "Activate insertion mode, insert newline below."
   (interactive)
   (xah-fly-insert-mode-activate)
   (open-line 1))
+
+(defun xah-fly-insert-mode-activate-space-before ()
+  "Insert a space, then activate insertion mode."
+  (interactive)
+  (insert " ")
+  (xah-fly-insert-mode-activate))
+
+(defun xah-fly-insert-mode-activate-space-after ()
+  "Insert a space, then activate insertion mode."
+  (interactive)
+  (insert " ")
+  (xah-fly-insert-mode-activate)
+  (left-char))
 
 
 
