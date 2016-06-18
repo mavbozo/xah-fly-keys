@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 4.6.6
+;; Version: 4.7.6
 ;; Created: 10 Sep 2013
 ;; Keywords: convenience, emulations, vim, ergoemacs
 ;; Homepage: http://ergoemacs.org/misc/ergoemacs_vi_mode.html
@@ -2257,14 +2257,14 @@ If `universal-argument' is called first, do switch frame."
     (define-key xah-fly-key-map (kbd "p") 'xah-fly-insert-mode-activate)
     (define-key xah-fly-key-map (kbd "m") 'xah-backward-left-bracket)
     (define-key xah-fly-key-map (kbd "l") 'forward-char)
-    (define-key xah-fly-key-map (kbd "s") 'xah-fly-insert-mode-activate)
+    (define-key xah-fly-key-map (kbd "s") 'open-line)
     (define-key xah-fly-key-map (kbd "r") 'kill-word)
     (define-key xah-fly-key-map (kbd "q") 'keyboard-escape-quit)
     (define-key xah-fly-key-map (kbd "c") 'xah-copy-line-or-region)
     (define-key xah-fly-key-map (kbd "o") 'forward-word)
     (define-key xah-fly-key-map (kbd ";") 'xah-end-of-line-or-block)
     (define-key xah-fly-key-map (kbd "k") 'next-line)
-    (define-key xah-fly-key-map (kbd "f") 'delete-char)
+    (define-key xah-fly-key-map (kbd "f") 'xah-fly-insert-mode-activate)
     (define-key xah-fly-key-map (kbd ".") 'xah-forward-right-bracket)
     (define-key xah-fly-key-map (kbd "w") 'xah-next-window-or-frame)
     ;;(define-key xah-fly-key-map (kbd "x") 'exchange-point-and-mark)
