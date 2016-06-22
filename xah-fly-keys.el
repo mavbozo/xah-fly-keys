@@ -2254,7 +2254,7 @@ If `universal-argument' is called first, do switch frame."
     (define-key xah-fly-key-map (kbd "g") 'kill-line)
     (define-key xah-fly-key-map (kbd "x") 'xah-cut-line-or-region)
     (define-key xah-fly-key-map (kbd "v") 'yank)
-    (define-key xah-fly-key-map (kbd "p") 'xah-fly-insert-mode-activate)
+    (define-key xah-fly-key-map (kbd "p") 'xah-fly-insert-mode-activate-space-before)
     (define-key xah-fly-key-map (kbd "m") 'xah-backward-left-bracket)
     (define-key xah-fly-key-map (kbd "l") 'forward-char)
     (define-key xah-fly-key-map (kbd "s") 'open-line)
