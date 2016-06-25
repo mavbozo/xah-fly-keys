@@ -3,7 +3,7 @@
 ;; Copyright © 2013-2015, by Xah Lee
 
 ;; Author: Xah Lee ( http://xahlee.org/ )
-;; Version: 4.7.6
+;; Version: 4.8.8
 ;; Created: 10 Sep 2013
 ;; Keywords: convenience, emulations, vim, ergoemacs
 ;; Homepage: http://ergoemacs.org/misc/ergoemacs_vi_mode.html
@@ -111,9 +111,10 @@
 
 ;; cursor movement
 
-(defun xah-jump-to-last-local-mark ()
+(defun xah-pop-local-mark-ring ()
   "Move cursor to last mark position of current buffer.
-Call this repeatedly will cycle all positions in local buffer `mark-ring'.
+Call this repeatedly will cycle all positions in `mark-ring'.
+URL `http://ergoemacs.org/emacs/emacs_jump_to_previous_position.html'
 version 2016-04-04"
   (interactive)
   (set-mark-command t))
@@ -122,7 +123,8 @@ version 2016-04-04"
   "Move cursor beginning of next text block.
 A text block is separated by blank lines.
 This command similar to `forward-paragraph', but this command's behavior is the same regardless of syntax table.
-Version 2015-07-06"
+URL `http://ergoemacs.org/emacs/emacs_move_by_paragraph.html'
+Version 2016-06-15"
   (interactive "p")
   (let ((φn (if (null φn) 1 φn)))
     (search-forward-regexp "\n[\t\n ]*\n+" nil "NOERROR" φn)))
@@ -130,7 +132,8 @@ Version 2015-07-06"
 (defun xah-backward-block (&optional φn)
   "Move cursor to previous text block.
 See: `xah-forward-block'
-Version 2015-07-08"
+URL `http://ergoemacs.org/emacs/emacs_move_by_paragraph.html'
+Version 2016-06-15"
   (interactive "p")
   (let ((φn (if (null φn) 1 φn))
         (ξi 1))
@@ -143,7 +146,9 @@ Version 2015-07-08"
 
 (defun xah-beginning-of-line-or-block (&optional φn)
   "Move cursor to beginning of line, or beginning of current or previous text block.
- (a text block is separated by blank lines)"
+ (a text block is separated by blank lines)
+URL `http://ergoemacs.org/emacs/emacs_keybinding_design_beginning-of-line-or-block.html'
+version 2016-06-15"
   (interactive "p")
   (let ((φn (if (null φn) 1 φn)))
     (if (equal φn 1)
@@ -157,7 +162,9 @@ Version 2015-07-08"
 
 (defun xah-end-of-line-or-block (&optional φn)
   "Move cursor to end of line, or end of current or next text block.
- (a text block is separated by blank lines)"
+ (a text block is separated by blank lines)
+URL `http://ergoemacs.org/emacs/emacs_keybinding_design_beginning-of-line-or-block.html'
+version 2016-06-15"
   (interactive "p")
   (let ((φn (if (null φn) 1 φn)))
     (if (equal φn 1)
@@ -379,7 +386,7 @@ When called repeatedly, append copy subsequent lines.
 When `universal-argument' is called first, copy whole buffer (respects `narrow-to-region').
 
 URL `http://ergoemacs.org/emacs/emacs_copy_cut_current_line.html'
-Version 2015-12-30"
+Version 2016-06-18"
   (interactive)
   (let (ξp1 ξp2)
     (if current-prefix-arg
@@ -389,17 +396,22 @@ Version 2015-12-30"
         (setq ξp1 (line-beginning-position) ξp2 (line-end-position))))
     (if (eq last-command this-command)
         (progn
+          (progn ; hack. exit if there's no more next line
+            (end-of-line)
+            (forward-char)
+            (backward-char))
           ;; (push-mark (point) "NOMSG" "ACTIVATE")
           (kill-append "\n" nil)
-          (forward-line 1)
-          (end-of-line)
           (kill-append (buffer-substring-no-properties (line-beginning-position) (line-end-position)) nil)
           (message "Line copy appended"))
       (progn
         (kill-ring-save ξp1 ξp2)
         (if current-prefix-arg
             (message "Buffer text copied")
-          (message "Text copied"))))))
+          (message "Text copied"))))
+    (end-of-line)
+    (forward-char)
+    ))
 
 (defun xah-cut-line-or-region ()
   "Cut current line, or text selection.
@@ -1163,50 +1175,53 @@ Version 2015-05-16"
 
 ;; misc
 
-(defvar xah-switch-buffer-ignore-dired t "If t, ignore dired buffer when calling `xah-next-user-buffer' or `xah-previous-user-buffer'")
-(setq xah-switch-buffer-ignore-dired t)
+(defun xah-user-buffer-q ()
+  "Return t if current buffer is a user buffer, else nil.
+Typically, if buffer name starts with *, it's not considered a user buffer.
+This function is used by buffer switching command and close buffer command, so that next buffer shown is a user buffer.
+You can override this function to get your idea of “user buffer”.
+version 2016-06-18"
+  (interactive)
+  (if (string-equal "*" (substring (buffer-name) 0 1))
+      nil
+    (if (string-equal major-mode "dired-mode")
+        nil
+      t
+      )))
 
 (defun xah-next-user-buffer ()
   "Switch to the next user buffer.
- “user buffer” is a buffer whose name does not start with “*”.
-If `xah-switch-buffer-ignore-dired' is true, also skip directory buffer.
-2015-01-05 URL `http://ergoemacs.org/emacs/elisp_next_prev_user_buffer.html'"
+“user buffer” is determined by `xah-user-buffer-q'.
+URL `http://ergoemacs.org/emacs/elisp_next_prev_user_buffer.html'
+Version 2016-06-19"
   (interactive)
   (next-buffer)
   (let ((i 0))
     (while (< i 20)
-      (if (or
-           (string-equal "*" (substring (buffer-name) 0 1))
-           (if (string-equal major-mode "dired-mode")
-               xah-switch-buffer-ignore-dired
-             nil
-             ))
+      (if (not (xah-user-buffer-q))
           (progn (next-buffer)
                  (setq i (1+ i)))
         (progn (setq i 100))))))
 
 (defun xah-previous-user-buffer ()
   "Switch to the previous user buffer.
- “user buffer” is a buffer whose name does not start with “*”.
-If `xah-switch-buffer-ignore-dired' is true, also skip directory buffer.
-2015-01-05 URL `http://ergoemacs.org/emacs/elisp_next_prev_user_buffer.html'"
+“user buffer” is determined by `xah-user-buffer-q'.
+URL `http://ergoemacs.org/emacs/elisp_next_prev_user_buffer.html'
+Version 2016-06-19"
   (interactive)
   (previous-buffer)
   (let ((i 0))
     (while (< i 20)
-      (if (or
-           (string-equal "*" (substring (buffer-name) 0 1))
-           (if (string-equal major-mode "dired-mode")
-               xah-switch-buffer-ignore-dired
-             nil
-             ))
+      (if (not (xah-user-buffer-q))
           (progn (previous-buffer)
                  (setq i (1+ i)))
         (progn (setq i 100))))))
 
 (defun xah-next-emacs-buffer ()
   "Switch to the next emacs buffer.
- (buffer name that starts with “*”)"
+“emacs buffer” here is buffer whose name starts with *.
+URL `http://ergoemacs.org/emacs/elisp_next_prev_user_buffer.html'
+Version 2016-06-19"
   (interactive)
   (next-buffer)
   (let ((i 0))
@@ -1215,7 +1230,9 @@ If `xah-switch-buffer-ignore-dired' is true, also skip directory buffer.
 
 (defun xah-previous-emacs-buffer ()
   "Switch to the previous emacs buffer.
- (buffer name that starts with “*”)"
+“emacs buffer” here is buffer whose name starts with *.
+URL `http://ergoemacs.org/emacs/elisp_next_prev_user_buffer.html'
+Version 2016-06-19"
   (interactive)
   (previous-buffer)
   (let ((i 0))
@@ -1232,13 +1249,12 @@ If `xah-switch-buffer-ignore-dired' is true, also skip directory buffer.
 Similar to `kill-buffer', with the following addition:
 
 • Prompt user to save if the buffer has been modified even if the buffer is not associated with a file.
-• Make sure the buffer shown after closing is a user buffer.
 • If the buffer is editing a source file in an org-mode file, prompt the user to save before closing.
 • If the buffer is a file, add the path to the list `xah-recently-closed-buffers'.
 • If it is the minibuffer, exit the minibuffer
 
-A emacs buffer is one whose name starts with *.
-Else it is a user buffer."
+URL `http://ergoemacs.org/emacs/elisp_close_buffer_open_last_closed.html'
+Version 2016-06-19"
   (interactive)
   (let (ξemacs-buff-p
         (ξorg-p (string-match "^*Org Src" (buffer-name))))
@@ -1272,17 +1288,12 @@ Else it is a user buffer."
             (setq xah-recently-closed-buffers (butlast xah-recently-closed-buffers 1))))
 
         ;; close
-        (kill-buffer (current-buffer))
-
-        ;; if emacs buffer, switch to a user buffer
-        (when (string-match "^*" (buffer-name))
-          (next-buffer)
-          (let ((i 0))
-            (while (and (string-equal "*" (substring (buffer-name) 0 1)) (< i 20))
-              (setq i (1+ i)) (next-buffer))))))))
+        (kill-buffer (current-buffer))))))
 
 (defun xah-open-last-closed ()
-  "Open the last closed file."
+  "Open the last closed file.
+URL `http://ergoemacs.org/emacs/elisp_close_buffer_open_last_closed.html'
+Version 2016-06-19"
   (interactive)
   (if (> (length xah-recently-closed-buffers) 0)
       (find-file (cdr (pop xah-recently-closed-buffers)))
@@ -1290,12 +1301,16 @@ Else it is a user buffer."
 
 (defun xah-open-recently-closed ()
   "Open recently closed file.
-Prompt for a choice."
+Prompt for a choice.
+URL `http://ergoemacs.org/emacs/elisp_close_buffer_open_last_closed.html'
+Version 2016-06-19"
   (interactive)
   (find-file (ido-completing-read "open:" (mapcar (lambda (f) (cdr f)) xah-recently-closed-buffers))))
 
 (defun xah-list-recently-closed ()
-  "List recently closed file."
+  "List recently closed file.
+URL `http://ergoemacs.org/emacs/elisp_close_buffer_open_last_closed.html'
+Version 2016-06-19"
   (interactive)
   (let ((ξbuf (generate-new-buffer "*recently closed*")))
     (switch-to-buffer ξbuf)
@@ -2159,7 +2174,7 @@ If `universal-argument' is called first, do switch frame."
       (define-key xah-fly-key-map (kbd "C--") 'text-scale-decrease)
       (define-key xah-fly-key-map (kbd "C-0") (lambda () (interactive) (text-scale-set 0)))))
 
-  (define-key xah-fly-key-map (kbd "M-1") 'xah-jump-to-last-local-mark)
+  (define-key xah-fly-key-map (kbd "M-1") 'xah-pop-local-mark-ring)
   (define-key xah-fly-key-map (kbd "M-2") 'pop-global-mark)
 
   (define-key xah-fly-key-map (kbd "M-RET") 'xah-cycle-hyphen-underscore-space)
@@ -2244,6 +2259,7 @@ If `universal-argument' is called first, do switch frame."
     (define-key xah-fly-key-map (kbd "0") 'xah-backward-punct)
 
     (define-key xah-fly-key-map (kbd "a") (if (fboundp 'smex) 'smex 'execute-extended-command ))
+<<<<<<< HEAD
     (define-key xah-fly-key-map (kbd "n") 'isearch-forward)
     (define-key xah-fly-key-map (kbd "i") 'previous-line)
     (define-key xah-fly-key-map (kbd "h") 'xah-beginning-of-line-or-block)
@@ -2266,6 +2282,29 @@ If `universal-argument' is called first, do switch frame."
     (define-key xah-fly-key-map (kbd "k") 'next-line)
     (define-key xah-fly-key-map (kbd "f") 'xah-fly-insert-mode-activate)
     (define-key xah-fly-key-map (kbd ".") 'xah-forward-right-bracket)
+=======
+    (define-key xah-fly-key-map (kbd "b") 'isearch-forward)
+    (define-key xah-fly-key-map (kbd "c") 'previous-line)
+    (define-key xah-fly-key-map (kbd "d") 'xah-beginning-of-line-or-block)
+    (define-key xah-fly-key-map (kbd "e") 'delete-backward-char)
+    (define-key xah-fly-key-map (kbd "f") 'undo)
+    (define-key xah-fly-key-map (kbd "g") 'backward-word)
+    (define-key xah-fly-key-map (kbd "h") 'backward-char)
+    (define-key xah-fly-key-map (kbd "i") 'kill-line)
+    (define-key xah-fly-key-map (kbd "j") 'xah-cut-line-or-region)
+    (define-key xah-fly-key-map (kbd "k") 'yank)
+    (define-key xah-fly-key-map (kbd "l") 'xah-fly-insert-mode-activate-space-before)
+    (define-key xah-fly-key-map (kbd "m") 'xah-backward-left-bracket)
+    (define-key xah-fly-key-map (kbd "n") 'forward-char)
+    (define-key xah-fly-key-map (kbd "o") 'open-line)
+    (define-key xah-fly-key-map (kbd "p") 'kill-word)
+    (define-key xah-fly-key-map (kbd "q") 'xah-copy-line-or-region)
+    (define-key xah-fly-key-map (kbd "r") 'forward-word)
+    (define-key xah-fly-key-map (kbd "s") 'xah-end-of-line-or-block)
+    (define-key xah-fly-key-map (kbd "t") 'next-line)
+    (define-key xah-fly-key-map (kbd "u") 'xah-fly-insert-mode-activate)
+    (define-key xah-fly-key-map (kbd "v") 'xah-forward-right-bracket)
+>>>>>>> master
     (define-key xah-fly-key-map (kbd "w") 'xah-next-window-or-frame)
     ;;(define-key xah-fly-key-map (kbd "x") 'exchange-point-and-mark)
     (define-key xah-fly-key-map (kbd "t") 'set-mark-command)
