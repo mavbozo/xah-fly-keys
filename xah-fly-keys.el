@@ -1930,7 +1930,8 @@ If `universal-argument' is called first, do switch frame."
    (";" . cider-eval-defun-to-comment)
    (":" . cider-read-and-eval)
    ("o" . cider-repl-clear-buffer)
-   ("O" . cider-repl-clear-output)))
+   ("O" . cider-repl-clear-output)
+   ("d" . cider-doc)))
 
 
 (xah-fly-map-keys
