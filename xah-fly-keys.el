@@ -1923,12 +1923,14 @@ If `universal-argument' is called first, do switch frame."
    ("p" . cider-eval-defun-at-point)
    ("u" . cider-eval-region)
    ("x" . cider-refresh)
-   ("w" . cider-eval-last-sexp-and-replace)
+   ("w" . cider-eval-last-sexp-and-repwlace)
    ("z" . cider-switch-to-repl-buffer)
    ("Z" . cider-load-buffer-and-switch-to-repl-buffer)
    ("." . cider-load-buffer)
    (";" . cider-eval-defun-to-comment)
-   (":" . cider-read-and-eval)))
+   (":" . cider-read-and-eval)
+   ("o" . cider-repl-clear-buffer)
+   ("O" . cider-repl-clear-output)))
 
 
 (xah-fly-map-keys
