@@ -2296,6 +2296,7 @@ If `universal-argument' is called first, do switch frame."
     ;; (define-key xah-fly-key-map (kbd "F") 'kill-line)
     (define-key xah-fly-key-map (kbd "Y") 'redo)
 
+    (define-key xah-fly-key-map (kbd "<f6>") 'keyboard-quit)
     ;;
     ))
 
