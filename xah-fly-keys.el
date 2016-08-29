@@ -1916,15 +1916,14 @@ If `universal-argument' is called first, do switch frame."
  '(
    ("c" . cider-eval-defun-at-point)
    ("C" . cider-connect)
+   ("d" . cider-doc)
    ("e" . cider-eval-last-sexp)
    ("E" . cider-eval-last-sexp-to-repl)
    ("n" . cider-eval-ns-form)
    ("N" . cider-repl-set-ns)
    ("p" . cider-eval-defun-at-point)
    ("u" . cider-eval-region)
-   ("x" . cider-dev>reset)
-   ("X" . cider-refresh)
-   ("w" . cider-eval-last-sexp-and-repwlace)
+   ("w" . cider-eval-last-sexp-and-replace)
    ("z" . cider-switch-to-repl-buffer)
    ("Z" . cider-load-buffer-and-switch-to-repl-buffer)
    ("." . cider-load-buffer)
@@ -1932,7 +1931,10 @@ If `universal-argument' is called first, do switch frame."
    (":" . cider-read-and-eval)
    ("o" . cider-repl-clear-buffer)
    ("O" . cider-repl-clear-output)
-   ("d" . cider-doc)))
+   ("t" . cider-test-run-test)
+   ("T" . cider-test-run-ns-tests)
+   ("x" . cider-dev>reset)
+   ("X" . cider-dev>c.t.n.repl/refresh)))
 
 
 (xah-fly-map-keys
@@ -2297,7 +2299,7 @@ If `universal-argument' is called first, do switch frame."
     ;; (define-key xah-fly-key-map (kbd "F") 'kill-line)
     (define-key xah-fly-key-map (kbd "Y") 'redo)
 
-    (define-key xah-fly-key-map (kbd "<f6>") 'keyboard-quit)
+    ;; (define-key xah-fly-key-map (kbd "<f6>") 'keyboard-quit)
     ;;
     ))
 
