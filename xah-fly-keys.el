@@ -2419,7 +2419,7 @@ If `universal-argument' is called first, do switch frame."
   (define-key xah-fly-leader-key-map "l" 'recenter-top-bottom)
   (define-key xah-fly-leader-key-map "m" 'dired-jump)
   (define-key xah-fly-leader-key-map "n" xah-harmless-keymap)
-  (define-key xah-fly-leader-key-map "o" 'exchange-point-and-mark)
+  (define-key xah-fly-leader-key-map "o" mavbozo-cider-keymap)
   (define-key xah-fly-leader-key-map "p" 'query-replace)
   (define-key xah-fly-leader-key-map "q" 'xah-copy-all-or-region)
   (define-key xah-fly-leader-key-map "r" xah-edit-cmds-keymap)
@@ -2430,7 +2430,7 @@ If `universal-argument' is called first, do switch frame."
   (define-key xah-fly-leader-key-map "w" xah-danger-keymap)
   (define-key xah-fly-leader-key-map "x" nil)
   (define-key xah-fly-leader-key-map "y" xah-leader-i-keymap)
-  (define-key xah-fly-leader-key-map "z" 'comment-dwim))
+  (define-key xah-fly-leader-key-map "z" 'exchange-point-and-mark))
 
 
 ;;;; misc
@@ -2658,26 +2658,26 @@ If `universal-argument' is called first, do switch frame."
 (defun xah-fly-command-mode-init ()
   "set command mode keys"
   (interactive)
-  (progn ; need shift key
+  (progn
+    (progn ; need shift key
       (define-key xah-fly-key-map "~" nil)
       (define-key xah-fly-key-map ":" nil) ;
       )
-  (progn ; special
-    
-    (define-key xah-fly-key-map (kbd "w") 'xah-shrink-whitespaces)
-    (define-key xah-fly-key-map (kbd "'") 'xah-cycle-hyphen-underscore-space)
-    (define-key xah-fly-key-map (kbd "e") 'backward-kill-word)
-    (define-key xah-fly-key-map (kbd "z") 'xah-goto-matching-bracket)
-    (define-key xah-fly-key-map (kbd "Z") 'xah-comment-dwim)
-    (define-key xah-fly-key-map (kbd "[") 'xah-backward-equal-sign)
-    (define-key xah-fly-key-map (kbd "\\") nil)
-    (define-key xah-fly-key-map (kbd "]") 'xah-forward-equal-sign)
-    (define-key xah-fly-key-map (kbd "-") 'xah-backward-quote )
-    (define-key xah-fly-key-map (kbd "=") 'xah-forward-quote-twice)
-    (define-key xah-fly-key-map (kbd "`") 'other-frame)
-    (define-key xah-fly-key-map (kbd "~") nil)
-    (define-key xah-fly-key-map (kbd "SPC") xah-fly-leader-key-map)
-
+    (progn ; special
+      (define-key xah-fly-key-map (kbd "q") 'xah-reformat-lines)
+      (define-key xah-fly-key-map (kbd "w") 'xah-shrink-whitespaces)
+      (define-key xah-fly-key-map (kbd "'") 'xah-cycle-hyphen-underscore-space)
+      (define-key xah-fly-key-map (kbd "e") 'backward-kill-word)
+      (define-key xah-fly-key-map (kbd "z") 'xah-comment-dwim)
+      (define-key xah-fly-key-map (kbd "[") 'xah-backward-equal-sign)
+      (define-key xah-fly-key-map (kbd "\\") nil)
+      (define-key xah-fly-key-map (kbd "]") 'xah-forward-equal-sign)
+      (define-key xah-fly-key-map (kbd "-") 'xah-backward-quote )
+      (define-key xah-fly-key-map (kbd "=") 'xah-forward-quote-twice)
+      (define-key xah-fly-key-map (kbd "`") 'other-frame)
+      (define-key xah-fly-key-map (kbd "SPC") xah-fly-leader-key-map)
+      (define-key xah-fly-key-map (kbd "DEL") xah-fly-leader-key-map) ; for kinesis
+      )
 
     (if xah-fly-swapped-1827-p
         (progn
@@ -2711,7 +2711,6 @@ If `universal-argument' is called first, do switch frame."
     (define-key xah-fly-key-map (kbd "x") 'xah-cut-line-or-region)
     (define-key xah-fly-key-map (kbd "v") 'yank)
     (define-key xah-fly-key-map (kbd "p") 'xah-fly-insert-mode-activate-space-before)
-
     (define-key xah-fly-key-map (kbd "m") 'xah-backward-left-bracket)
     (define-key xah-fly-key-map (kbd "l") 'forward-char)
     (define-key xah-fly-key-map (kbd "s") 'open-line)
@@ -2723,19 +2722,12 @@ If `universal-argument' is called first, do switch frame."
     (define-key xah-fly-key-map (kbd "f") 'xah-fly-insert-mode-activate)
     (define-key xah-fly-key-map (kbd ".") 'xah-forward-right-bracket)
     (define-key xah-fly-key-map (kbd ",") 'xah-next-window-or-frame)
-    (define-key xah-fly-key-map (kbd "b") 'exchange-point-and-mark)
+    (define-key xah-fly-key-map (kbd "b") nil)
     (define-key xah-fly-key-map (kbd "t") 'set-mark-command)
-    (define-key xah-fly-key-map (kbd "/") 'comment-dwim)
+    (define-key xah-fly-key-map (kbd "/") 'xah-goto-matching-bracket)
 
-    ;; 
-    (define-key xah-fly-key-map (kbd "I") 'pop-global-mark)
-    (define-key xah-fly-key-map (kbd "D") nil)
-    (define-key xah-fly-key-map (kbd "K") 'xah-jump-to-last-local-mark)
-    ;; (define-key xah-fly-key-map (kbd "F") 'kill-line)
     (define-key xah-fly-key-map (kbd "Y") 'redo)
 
-    ;; (define-key xah-fly-key-map (kbd "<f6>") 'keyboard-quit)
-    ;;
     ))
 
 (defun xah-fly-insert-mode-init ()
@@ -2794,35 +2786,6 @@ If `universal-argument' is called first, do switch frame."
     (define-key xah-fly-key-map (kbd "x") nil)
     (define-key xah-fly-key-map (kbd "y") nil)
     (define-key xah-fly-key-map (kbd "z") nil)
-
-    (define-key xah-fly-key-map (kbd "A") nil)
-    (define-key xah-fly-key-map (kbd "B") nil)
-    (define-key xah-fly-key-map (kbd "C") nil)
-    (define-key xah-fly-key-map (kbd "D") nil)
-    (define-key xah-fly-key-map (kbd "E") nil)
-    (define-key xah-fly-key-map (kbd "F") nil)
-    (define-key xah-fly-key-map (kbd "G") nil)
-    (define-key xah-fly-key-map (kbd "H") nil)
-    (define-key xah-fly-key-map (kbd "I") nil)
-    (define-key xah-fly-key-map (kbd "J") nil)
-    (define-key xah-fly-key-map (kbd "K") nil)
-    (define-key xah-fly-key-map (kbd "L") nil)
-    (define-key xah-fly-key-map (kbd "M") nil)
-    (define-key xah-fly-key-map (kbd "N") nil)
-    (define-key xah-fly-key-map (kbd "O") nil)
-    (define-key xah-fly-key-map (kbd "P") nil)
-    (define-key xah-fly-key-map (kbd "Q") nil)
-    (define-key xah-fly-key-map (kbd "R") nil)
-    (define-key xah-fly-key-map (kbd "S") nil)
-    (define-key xah-fly-key-map (kbd "T") nil)
-    (define-key xah-fly-key-map (kbd "U") nil)
-    (define-key xah-fly-key-map (kbd "V") nil)
-    (define-key xah-fly-key-map (kbd "W") nil)
-    (define-key xah-fly-key-map (kbd "X") nil)
-    (define-key xah-fly-key-map (kbd "Y") nil)
-    (define-key xah-fly-key-map (kbd "Z") nil)
-
-    
 
     ;;
 ))
