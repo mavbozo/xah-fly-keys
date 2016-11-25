@@ -2700,7 +2700,7 @@ If `universal-argument' is called first, do switch frame."
       (define-key xah-fly-key-map (kbd "=") 'xah-forward-quote-twice)
       (define-key xah-fly-key-map (kbd "`") 'other-frame)
       (define-key xah-fly-key-map (kbd "SPC") xah-fly-leader-key-map)
-      (define-key xah-fly-key-map (kbd "DEL") xah-fly-leader-key-map) ; for kinesis
+      ;; (define-key xah-fly-key-map (kbd "DEL") xah-fly-leader-key-map) ; for kinesis
       )
 
     (if xah-fly-swapped-1827-p
